@@ -1,0 +1,111 @@
+/* ============================================================
+   Терминальная тема портала — в стиле обложек статей автора.
+   Палитра: глубокий сине-графитовый фон, янтарный акцент,
+   терминальный зелёный, коралловый для ошибок/удалений.
+   Шрифты: JetBrains Mono (заголовки, навигация, код) + Inter (текст).
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap');
+
+:root {
+  /* --- светлая тема: сдержанный "бумажный терминал" --- */
+  --ifm-color-primary: #a3691f;            /* янтарь, затемнён для контраста */
+  --ifm-color-primary-dark: #935e1c;
+  --ifm-color-primary-darker: #8b591a;
+  --ifm-color-primary-darkest: #724916;
+  --ifm-color-primary-light: #b47422;
+  --ifm-color-primary-lighter: #bc7a24;
+  --ifm-color-primary-lightest: #d18a2a;
+
+  --ifm-background-color: #f7f8fa;
+  --ifm-font-color-base: #1b2432;
+  --ifm-font-family-base: 'Inter', system-ui, sans-serif;
+  --ifm-font-family-monospace: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+  --ifm-heading-font-family: var(--ifm-font-family-monospace);
+  --ifm-heading-font-weight: 600;
+  --ifm-code-font-size: 90%;
+
+  --brand-green: #2e9e64;
+  --brand-coral: #c74f4f;
+  --brand-border: #e2e6ec;
+}
+
+[data-theme='dark'] {
+  /* --- тёмная тема: основная, один в один с обложками --- */
+  --ifm-color-primary: #e5a158;            /* янтарный акцент */
+  --ifm-color-primary-dark: #e19546;
+  --ifm-color-primary-darker: #df8f3c;
+  --ifm-color-primary-darkest: #c97a26;
+  --ifm-color-primary-light: #e9ad6a;
+  --ifm-color-primary-lighter: #ebb373;
+  --ifm-color-primary-lightest: #f0c592;
+
+  --ifm-background-color: #0e1522;         /* глубокий фон обложки */
+  --ifm-background-surface-color: #131c2e; /* панели/навбар */
+  --ifm-font-color-base: #c7d0de;          /* серо-голубой текст */
+  --ifm-heading-color: #dfe6f0;
+
+  --brand-green: #59c389;
+  --brand-coral: #e26d6d;
+  --brand-border: #2a3548;
+
+  --ifm-toc-border-color: var(--brand-border);
+  --ifm-table-border-color: var(--brand-border);
+  --docusaurus-highlighted-code-line-bg: #1c2942;
+}
+
+/* ---------- навигация: моно, как строка терминала ---------- */
+.navbar {
+  border-bottom: 1px solid var(--brand-border);
+  font-family: var(--ifm-font-family-monospace);
+}
+.navbar__title { font-weight: 700; letter-spacing: -0.02em; }
+.navbar__link { font-size: 0.86rem; }
+[data-theme='dark'] .navbar { background: var(--ifm-background-surface-color); }
+
+/* ---------- сайдбар: категории как секции конфига ---------- */
+.menu { font-family: var(--ifm-font-family-monospace); font-size: 0.82rem; }
+.menu__link { border-radius: 6px; }
+.menu__list-item-collapsible .menu__link--sublist {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.72rem;
+  color: var(--ifm-color-emphasis-600);
+}
+
+/* ---------- заголовки: моно с "промптом" у h2 ---------- */
+h1, h2, h3 { letter-spacing: -0.02em; }
+.markdown h2::before {
+  content: '\203A\00a0';               /* › */
+  color: var(--ifm-color-primary);
+}
+
+/* ---------- код и таблицы ---------- */
+[data-theme='dark'] .theme-code-block,
+[data-theme='dark'] pre { background: #0b111c !important; }
+code { border: 1px solid var(--brand-border); }
+table thead {
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ---------- смысловые цвета: галочки и предупреждения ---------- */
+.alert--success { --ifm-alert-border-color: var(--brand-green); }
+.alert--danger, .alert--warning { --ifm-alert-border-color: var(--brand-coral); }
+[data-theme='dark'] .alert {
+  background: var(--ifm-background-surface-color);
+  border: 1px solid var(--brand-border);
+  border-left-width: 4px;
+}
+
+/* ---------- бейджи HTTP-методов в референсе (openapi-тема) ---------- */
+[data-theme='dark'] .menu__list-item .api-method > .menu__link::before {
+  font-family: var(--ifm-font-family-monospace);
+}
+
+/* ---------- ссылки-«хвосты» и мелочи ---------- */
+.footer { border-top: 1px solid var(--brand-border); font-size: 0.85rem; }
+[data-theme='dark'] .footer { background: #0b111c; }
+.pagination-nav__link { border-color: var(--brand-border); border-radius: 10px; }

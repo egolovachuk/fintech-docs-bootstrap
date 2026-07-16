@@ -1,0 +1,58 @@
+# Пайплайн: линтинг спеки -> сборка -> деплой на S3.
+# Имена бакетов/регион подставлены bootstrap.py. СЕКРЕТЫ СЮДА НЕ ПИСАТЬ:
+# AWS_ACCESS_KEY_ID и AWS_SECRET_ACCESS_KEY задайте в
+# Settings -> CI/CD -> Variables (Masked). Опционально там же:
+# CLOUDFRONT_DISTRIBUTION_ID — тогда после деплоя сбрасывается кэш.
+image: node:20
+
+stages: [lint, build, deploy]
+
+variables:
+  S3_BUCKET_STAGING: "{{S3_BUCKET_STAGING}}"
+  S3_BUCKET_PROD: "{{S3_BUCKET_PROD}}"
+  AWS_DEFAULT_REGION: "{{AWS_REGION}}"
+
+lint_spec:
+  stage: lint
+  script:
+    - npx --yes @stoplight/spectral-cli lint "{{OPENAPI_PATH}}" --ruleset .spectral.yaml
+
+build_docs:
+  stage: build
+  script:
+    - npm ci
+    - npx docusaurus gen-api-docs all
+    - npm run build
+  artifacts:
+    paths: [build]
+    expire_in: 1 week
+
+.deploy_s3_template: &deploy_s3
+  stage: deploy
+  image:
+    name: amazon/aws-cli:2.17.0
+    entrypoint: [""]
+  script:
+    - aws s3 sync build/ "s3://${TARGET_BUCKET}" --delete
+    - >
+      if [ -n "$CLOUDFRONT_DISTRIBUTION_ID" ]; then
+      aws cloudfront create-invalidation
+      --distribution-id "$CLOUDFRONT_DISTRIBUTION_ID" --paths "/*";
+      fi
+
+deploy_staging:
+  <<: *deploy_s3
+  variables:
+    TARGET_BUCKET: $S3_BUCKET_STAGING
+  environment: { name: staging }
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+
+deploy_prod:
+  <<: *deploy_s3
+  variables:
+    TARGET_BUCKET: $S3_BUCKET_PROD
+  environment: { name: production }
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: manual   # прод — только ручной кнопкой в пайплайне
