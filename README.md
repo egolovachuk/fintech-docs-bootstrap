@@ -1,9 +1,28 @@
-# Документация для API-first финтеха — в один клик
+# Documentation for API-first fintechs, in one click
 
-Одна команда разворачивает готовый портал документации: тёмная терминальная
-тема, выверенная структура разделов, справочник API из вашей OpenAPI-спеки,
-линтер спеки и CI с публикацией. Сайт создаётся **официальным генератором**
-openapi-плагина (не самосбором), поверх накладывается авторский контент.
+## What this is and isn't
+
+This script is a scaffold, not a magic pill. It handles the initial setup and
+routes you around every known pitfall—each check inside was earned on a real
+installation. It doesn't change three facts: the ecosystem keeps moving, you
+still write the content for your product, and keeping documentation in sync
+with reality is a separate discipline that no generator solves. The author
+writes about that discipline separately. <!-- TODO: link -->
+
+The author maintains the scaffold, tracks version compatibility, and updates
+the checks. Issues and pull requests are welcome. For anything beyond the
+scaffold—tailoring it to your product, design work, an audit of your existing
+documentation, or running the portal as a managed service—[contact the
+author](https://www.linkedin.com/in/egolovachuk/).
+
+## What you get
+
+A dark terminal-style theme, a deliberate section structure, an API reference
+generated from your OpenAPI spec, spec linting, and CI with publishing. The
+[official generator](https://github.com/PaloAltoNetworks/docusaurus-openapi-docs)
+of the OpenAPI plugin creates the site; the author's content layers on top.
+The site ships in English by default, with Russian available as a second
+locale.
 
 ```bash
 python3 bootstrap.py
@@ -11,163 +30,185 @@ python3 bootstrap.py
 
 ---
 
-## Шаг 0. Что нужно до старта
+## Step 0: Check the prerequisites
 
-- **Python 3.9+** — проверка: `python3 --version`
-- **Node.js 20+** — проверка: `node --version`; если нет или старее —
-  поставьте LTS с nodejs.org или `nvm install 22 && nvm use 22`
-- **Ваша OpenAPI-спека** (yaml/json) — опционально: без неё скрипт подключит
-  богатый пример, замените позже
-- Интернет: скрипт скачивает шаблон и зависимости
+Before you start, make sure you have:
 
-Скрипт сам проверит окружение и подскажет, чего не хватает.
+- **Python 3.9 or later.** To check, run `python3 --version`.
+- **Node.js 20 or later.** To check, run `node --version`. If Node.js is
+  missing or older, install the LTS release from
+  [nodejs.org](https://nodejs.org), or run `nvm install 22 && nvm use 22`.
+- **Your OpenAPI spec** (YAML or JSON). This is optional: without it, the
+  script wires up a detailed example spec that you replace later.
+- **Internet access.** The script downloads the template and dependencies.
 
-## Шаг 1. Установка
+The script also checks the environment and tells you what's missing.
+
+## Step 1: Install
+
+To create the portal in `./api-docs`, run:
 
 ```bash
-python3 bootstrap.py            # портал в ./api-docs
-# или: python3 bootstrap.py my-docs — своё имя папки
+python3 bootstrap.py
 ```
 
-Ответьте на 4 вопроса: название продукта, компания, публичный URL, путь к
-спеке. Дальше скрипт всё делает сам (7 шагов с зелёными галочками):
-проверка окружения → эталонный сайт от мейнтейнеров плагина → ваш контент
-(Быстрый старт, Аутентификация, Сценарии, Каталог ошибок, Changelog) →
-фирменная тема, логотип, favicon → настройка конфига и чистка демо →
-зависимости и генерация справочника → предпросмотр на http://localhost:3000.
+To use a different folder name, pass it as an argument:
 
-Если что-то не удалось настроить автоматически, скрипт помечает это жёлтым
-`!` с подсказкой, что поправить руками.
+```bash
+python3 bootstrap.py my-docs
+```
 
-Полезные флаги: `--defaults` (без вопросов, демо-значения), `--no-start`
-(не запускать предпросмотр), `--skip-scaffold` (эталон уже развёрнут).
+Answer four questions: product name, company, public URL, and the path to
+your spec. The script then runs seven steps on its own, marking each with a
+green checkmark: it checks the environment, scaffolds the reference site from
+the plugin maintainers, adds your content (Quickstart, Authentication,
+Scenarios, Error catalog, Changelog), applies the branded theme, configures
+the site and removes the demo content, installs dependencies, generates the
+reference, and starts a preview at `http://localhost:3000`.
 
-## Шаг 2. Первый коммит
+When the script can't configure something automatically, it flags the item
+with a yellow `!` and tells you what to fix by hand.
+
+The script accepts these flags:
+
+- `--defaults`: skip the questions and use demo values.
+- `--no-start`: don't start the preview server.
+- `--skip-scaffold`: use a reference site that's already in place.
+- `--deploy=s3`: set up AWS S3 deployment (see [Step 3](#step-3-publish)).
+
+## Step 2: Make the first commit
 
 ```bash
 cd api-docs
 git init && git add -A && git commit -m "docs portal"
 ```
 
-**Обязательно закоммитьте `package-lock.json`** — он фиксирует проверенную
-связку версий, и у каждого, кто клонирует репозиторий, соберётся ровно она.
+Commit `package-lock.json`. It pins the verified combination of versions, so
+anyone who clones the repository builds the same site you did.
 
-## Шаг 3. Публикация — два пути
+## Step 3: Publish
 
-### Путь А: GitLab Pages / GitHub Pages (проще всего)
+Choose one of two paths.
 
-Ничего настраивать не нужно: пайплайны уже в репозитории
-(`.gitlab-ci.yml`, `.github/workflows/docs.yml`). Запушьте в основную
-ветку — CI слинтует спеку, соберёт сайт и опубликует. Адрес страницы —
-в Settings → Pages вашего GitLab/GitHub.
+### Path A: GitLab Pages or GitHub Pages
 
-### Путь Б: свой хостинг на AWS S3
+You don't configure anything. The pipelines are already in the repository
+(`.gitlab-ci.yml` and `.github/workflows/docs.yml`). Push to the default
+branch. CI lints the spec, builds the site, and publishes it. To find the
+page URL, go to **Settings > Pages** in GitLab or GitHub.
 
-Разворачивайте с флагом:
+### Path B: AWS S3
+
+To set up S3 deployment, run:
 
 ```bash
 python3 bootstrap.py --deploy=s3
 ```
 
-Скрипт дополнительно спросит имена двух бакетов (staging и production)
-и регион — и соберёт пайплайн с тремя сценариями: **линт+сборка** на каждый
-пуш, **автодеплой в staging** с основной ветки, **деплой в production —
-только ручной кнопкой** в пайплайне (прод не деплоится с ноутбука).
+The script asks for two bucket names (staging and production) and a region,
+then generates a pipeline with three behaviors: it lints and builds on every
+push, deploys to staging automatically from the default branch, and deploys
+to production only when you click the manual button in the pipeline. You don't
+deploy to production from a laptop.
 
-#### Настройка AWS с нуля (если вы в танке — это нормально)
+If you already installed the portal in Step 1 without this flag, don't
+reinstall. Run the following instead, which rebuilds only the CI and config
+and leaves your content untouched:
 
-1. **Создайте два бакета.** Консоль AWS → S3 → Create bucket. Имена —
-   те, что скажете скрипту (например, `mycompany-docs-staging` и
-   `mycompany-docs-prod`); имя бакета глобально уникально. Регион — один
-   для обоих, его тоже скажете скрипту.
-2. **Включите отдачу сайта.** В каждом бакете: Properties → Static website
-   hosting → Enable; Index document: `index.html`, Error document:
-   `404.html`. Затем Permissions: снимите Block public access и добавьте
-   bucket policy, разрешающую `s3:GetObject` всем (шаблон политики консоль
-   подскажет). Для приватного/продакшн-контура правильнее CloudFront поверх
-   бакета — тогда бакет остаётся закрытым; это можно сделать позже.
-3. **Создайте ключи для CI.** Консоль AWS → IAM → Users → Create user
-   (имя вроде `docs-ci`, доступ к консоли не нужен). Права: прикрепите
-   политику с доступом только к этим двум бакетам (минимум —
-   `s3:PutObject`, `s3:DeleteObject`, `s3:ListBucket` на них; на первое
-   время подойдёт управляемая AmazonS3FullAccess, но сузьте потом).
-   Затем: Security credentials → Create access key → вариант
-   "Third-party service". Получите пару: **Access key ID** и
-   **Secret access key**. Секретный ключ показывается один раз —
-   сохраните его сразу.
-4. **Положите ключи в GitLab — и только туда.** Ваш проект → Settings →
-   CI/CD → Variables → Add variable, две штуки:
-   - `AWS_ACCESS_KEY_ID` = ключ из шага 3
-   - `AWS_SECRET_ACCESS_KEY` = секрет из шага 3, флажки **Masked** (+ Protected,
-     если деплоите только из защищённых веток)
-   В файлы репозитория ключи не попадают никогда. Если завели CloudFront —
-   добавьте третьей переменной `CLOUDFRONT_DISTRIBUTION_ID`, и пайплайн
-   будет сбрасывать кэш после деплоя.
-5. **Запушьте.** Пайплайн соберёт сайт и выложит в staging-бакет; адрес —
-   в свойствах бакета (Static website hosting → Bucket website endpoint).
-   Когда готовы к бою — в GitLab CI/CD → Pipelines нажмите ▶ у job
-   `deploy_prod`.
+```bash
+python3 bootstrap.py api-docs --skip-scaffold --deploy=s3
+```
 
-Техническая деталь, которую скрипт уже сделал за вас: в конфиг добавлен
-`trailingSlash: true` — без него роутинг статики на S3 отдаёт 404 на
-внутренних страницах.
+#### Set up AWS from scratch
 
-## Шаг 4. Жизнь после установки
+If you've never used AWS, follow these steps.
 
-Три жеста, покрывающих 95% работы:
+1. **Create two buckets.** In the AWS Console, go to **S3 > Create bucket**.
+   Use the names you give the script, for example `mycompany-docs-staging` and
+   `mycompany-docs-prod`. Bucket names are globally unique. Choose one region
+   for both, and give that region to the script.
+2. **Enable website hosting.** In each bucket, go to **Properties > Static
+   website hosting** and select **Enable**. Set the index document to
+   `index.html` and the error document to `404.html`. Then, under
+   **Permissions**, turn off **Block public access** and add a bucket policy
+   that allows `s3:GetObject` for everyone. The console suggests a policy
+   template. For a private or production setup, put CloudFront in front of the
+   bucket so the bucket stays closed. You can add CloudFront later.
+3. **Create keys for CI.** In the AWS Console, go to **IAM > Users > Create
+   user**. Name the user `docs-ci` and skip console access. For permissions,
+   attach a policy scoped to these two buckets—at minimum `s3:PutObject`,
+   `s3:DeleteObject`, and `s3:ListBucket`. The managed `AmazonS3FullAccess`
+   policy works at first, but narrow it later. Then go to **Security
+   credentials > Create access key** and choose **Third-party service**. You
+   get an access key ID and a secret access key. AWS shows the secret only
+   once, so save it now.
+4. **Store the keys in GitLab, and nowhere else.** In your project, go to
+   **Settings > CI/CD > Variables** and add two variables:
+   - `AWS_ACCESS_KEY_ID`: the key from step 3.
+   - `AWS_SECRET_ACCESS_KEY`: the secret from step 3. Select **Masked**. Also
+     select **Protected** if you deploy only from protected branches.
 
-- **Тексты** — правьте markdown в `docs/`; dev-сервер (`npm start`)
-  перерисовывает на лету. Внимание: `.md` компилируется как MDX —
-  примеры кода с `{}` или `<>` держите в код-блоках.
-- **Изменился API** — правьте `openapi/openapi.yaml`, затем:
-  `npm run lint:spec && npx docusaurus gen-api-docs all`. Папку `docs/api`
-  руками не трогать — она генерируется. Группы в справочнике = теги спеки.
-- **Вид и меню** — `docusaurus.config.ts` (заголовки, навбар) и
-  `src/css/custom.css` (все цвета — переменными в шапке файла).
+   The keys never enter the repository files. If you set up CloudFront, add a
+   third variable, `CLOUDFRONT_DISTRIBUTION_ID`. The pipeline then invalidates
+   the cache after each deploy.
+5. **Push.** The pipeline builds the site and uploads it to the staging
+   bucket. To find the address, go to the bucket's **Static website hosting >
+   Bucket website endpoint**. When you're ready to go live, go to **CI/CD >
+   Pipelines** in GitLab and click the play button on the `deploy_prod` job.
 
-Структура разделов не случайна — это порядок вопросов интегратора; почему
-так, объяснено внутри самих разделов (главное — шаблон сценария из семи
-вопросов в docs/scenarios/).
+The script already added `trailingSlash: true` to the config. Without it,
+static routing on S3 returns 404 on inner pages.
 
-## Если что-то пошло не так
+## Step 4: Maintain the site
 
-- **`Minimum Node.js version not met`** — обновите Node: `nvm install 22`.
-- **Ошибка на шаге эталона** — это вывод самого генератора (обычно сеть/
-  прокси). Можно вручную: `npx create-docusaurus-openapi-docs@latest api-docs`,
-  затем `python3 bootstrap.py api-docs --skip-scaffold`.
-- **Генерация справочника упала** — почти всегда невалидная спека:
-  `npm run lint:spec` покажет где.
-- **`MDX compilation failed ... <!--`** — HTML-комментарии запрещены в MDX,
-  используйте `{/* текст */}` (скрипт конвертирует их при установке).
-- **`Hook useDoc is called outside the <DocProvider>`** — две копии
-  @docusaurus-пакетов в node_modules:
+Three tasks cover most of the work:
+
+- **Edit content.** Edit the Markdown in `docs/`. The dev server (`npm start`)
+  re-renders as you save. Docusaurus compiles `.md` files as MDX, so keep code
+  examples that contain `{}` or `<>` inside code blocks.
+- **Update the API.** Edit `openapi/openapi.yaml`, then run
+  `npm run lint:spec && npx docusaurus gen-api-docs all`. Don't edit the
+  `docs/api` folder by hand—the script generates it. Groups in the reference
+  map to tags in your spec.
+- **Change the look and navigation.** Edit `docusaurus.config.ts` for titles
+  and the navbar, and `src/css/custom.css` for colors. The color variables sit
+  at the top of the CSS file.
+
+The section structure follows the order of an integrator's questions. Each
+section explains its own reasoning. The most important part is the
+seven-question scenario template in `docs/scenarios/`.
+
+## Troubleshooting
+
+- **`Minimum Node.js version not met`.** Update Node.js: `nvm install 22`.
+- **An error at the scaffolding step.** This is the generator's own output,
+  usually a network or proxy problem. To scaffold manually, run
+  `npx create-docusaurus-openapi-docs@latest api-docs`, then
+  `python3 bootstrap.py api-docs --skip-scaffold`.
+- **Reference generation failed.** The spec is almost always invalid. Run
+  `npm run lint:spec` to find the problem.
+- **`MDX compilation failed ... <!--`.** MDX doesn't allow HTML comments. Use
+  `{/* text */}` instead. The script converts them during installation.
+- **A page crashes with `... is not defined`.** The Markdown contains bare
+  curly braces, such as template placeholders `{{...}}`, and MDX runs them as
+  code. Move the example into a code block or remove it.
+- **`Hook useDoc is called outside the <DocProvider>`.** Two copies of
+  `@docusaurus` packages are in `node_modules`. Run
   `rm -rf node_modules package-lock.json && npm install && npm dedupe`.
-- **Любая странность после смены версий** — полная пересборка:
-  `rm -rf node_modules package-lock.json .docusaurus docs/api && npm install
-  && npx docusaurus gen-api-docs all`.
+- **Anything odd after a version change.** Do a full rebuild:
+  `rm -rf node_modules package-lock.json .docusaurus docs/api && npm install &&
+  npx docusaurus gen-api-docs all`.
 
-## Версии: почему прибиты и как обновлять
+## Versions: why they're pinned and how to upgrade
 
-Docusaurus и openapi-плагин с темой проектируются согласованными парами,
-поэтому база — официальный шаблон мейнтейнеров, а версии фиксирует
-lock-файл. Не обновляйте эти пакеты по одному: сверьтесь с таблицей
-совместимости в README плагина (PaloAltoNetworks/docusaurus-openapi-docs),
-поднимите связку целиком и сделайте полную пересборку (команда выше).
+Docusaurus and the OpenAPI plugin and theme are designed as matched sets. The
+base is the maintainers' official template, and the lock file pins the
+versions. Don't upgrade these packages one at a time. Instead, check the
+compatibility table in the
+[plugin's README](https://github.com/PaloAltoNetworks/docusaurus-openapi-docs),
+upgrade the whole set together, and do a full rebuild with the command in
+[Troubleshooting](#troubleshooting).
 
-## Что это — и что это не
+## License
 
-Этот скрипт — **каркас, а не волшебная таблетка**. Он снимает первичную
-сборку и обходит все известные грабли (каждая проверка внутри выстрадана
-на реальной установке). Он не отменяет того, что экосистема продолжит
-двигаться, тексты предстоит наполнять под ваш продукт, а соответствие
-документации реальности — отдельная дисциплина, которую не решает ни один
-генератор (об этом — статья автора <!-- TODO: ссылка -->).
-
-Каркас я поддерживаю: слежу за совместимостью версий и обновляю проверки —
-issues и PR приветствуются. Если нужно больше — настройка под ваш продукт,
-дизайн, аудит существующей документации или сопровождение портала как
-сервис — это моя профессиональная работа: <!-- TODO: контакт -->.
-
-## Лицензия
-
-MIT. Форкайте и используйте свободно; ссылка на автора приветствуется.
+MIT. Fork it and use it freely. A credit link to the author is appreciated.
